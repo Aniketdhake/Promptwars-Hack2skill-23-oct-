@@ -559,11 +559,19 @@ app.post('/api/plan', async (req, res) => {
   }
 });
 
-// Start server
-app.listen(PORT, () => {
-  console.log(`=================================================`);
-  console.log(` FreshLoop Server Running`);
-  console.log(` URL: http://localhost:${PORT}`);
-  console.log(` Gemini Key: ${process.env.GEMINI_API_KEY ? 'Configured' : 'Offline / Fallback Mode'}`);
-  console.log(`=================================================`);
-});
+// Start server only when executed directly
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`=================================================`);
+    console.log(` FreshLoop Server Running`);
+    console.log(` URL: http://localhost:${PORT}`);
+    console.log(` Gemini Key: ${process.env.GEMINI_API_KEY ? 'Configured' : 'Offline / Fallback Mode'}`);
+    console.log(`=================================================`);
+  });
+}
+
+module.exports = {
+  app,
+  generateOfflineRescuePlan,
+  FOOD_SAFETY_NOTICE
+};

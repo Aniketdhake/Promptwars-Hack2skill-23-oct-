@@ -112,7 +112,17 @@ node server.js
 
 ---
 
-### 4. Open the App
+### 4. Run Automated Tests
+
+Run the built-in automated test suite (covers date-priority logic, ID verification, confirmation gate, and offline fallback with mocked Gemini calls):
+
+```powershell
+npm.cmd test
+```
+
+---
+
+### 5. Open the App
 
 Navigate to:
 ```
