@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FreshLoop • Transparent Food-Rescue Planner</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Global Application Header -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="brand">
+        <div class="brand-icon">
+          <!-- Warm Loop & Sprout SVG -->
+          <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M16 3C8.82 3 3 8.82 3 16C3 23.18 8.82 29 16 29C23.18 29 29 23.18 29 16" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+            <path d="M25 7L29 11L25 15" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M16 22C16 17 21 15 21 15C21 15 19 20 16 22Z" fill="var(--citrus-400)" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+            <path d="M16 22C16 18 12 17 12 17C12 17 13 21 16 22Z" fill="var(--citrus-300)" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+            <path d="M16 24V19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <h1>FreshLoop</h1>
+          <span class="tagline">Transparent Food-Rescue Planner</span>
+        </div>
+      </div>
+
+      <div class="header-status">
+        <div id="connectionStatus" class="status-pill status-checking" title="Checking server status">
+          <span class="status-dot"></span>
+          <span class="status-label">Connecting...</span>
+        </div>
+        <button id="quickSampleBtn" class="btn btn-outline-light btn-sm" title="Preload realistic pantry items with soonest dates">
+          🌱 Load Sample Pantry
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Food Safety Notice Banner -->
+  <div class="safety-banner" role="region" aria-label="Food Safety Notice">
+    <div class="safety-banner-content">
+      <div class="safety-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          <path d="M12 8v4"/>
+          <path d="M12 16h.01"/>
+        </svg>
+      </div>
+      <p>
+        <strong>Food Safety Reminder:</strong> Listed dates (best-by, use-by, sell-by) indicate peak quality, not guaranteed safety. Always inspect perishables for off-odors, discoloration, unusual texture, or mold before eating.
+      </p>
+    </div>
+  </div>
+
+  <!-- Main Application Content -->
+  <main class="main-container">
+    <div class="workspace-grid">
+
+      <!-- LEFT COLUMN: PANTRY INVENTORY -->
+      <section class="panel pantry-panel" aria-labelledby="pantryHeading">
+        <div class="panel-header">
+          <div>
+            <h2 id="pantryHeading">Pantry & Fridge</h2>
+            <p class="panel-subtitle">Items sorted by upcoming expiration dates</p>
+          </div>
+          <button id="toggleAddFormBtn" class="btn btn-primary btn-sm" aria-expanded="false">
+            <span class="btn-icon">+</span> Add Food Item
+          </button>
+        </div>
+
+        <!-- Add Item Form (Expandable) -->
+        <div id="addItemCard" class="add-item-card" hidden>
+          <div class="card-inner-header">
+            <h3>Add New Pantry Item</h3>
+            <button id="closeAddFormBtn" class="icon-btn" aria-label="Close form">&times;</button>
+          </div>
+          <form id="addItemForm" novalidate>
+            <div class="form-row">
+              <div class="form-group flex-2">
+                <label for="itemName">Item Name *</label>
+                <input type="text" id="itemName" placeholder="e.g. Cooked Dal, Poha, Palak, Paneer" required maxlength="80">
+              </div>
+              <div class="form-group flex-1">
+                <label for="itemCategory">Category</label>
+                <select id="itemCategory">
+                  <option value="Grains & staples">Grains & staples (rice, atta, poha, suji)</option>
+                  <option value="Dal & pulses">Dal & pulses (toor, moong, masoor, chana)</option>
+                  <option value="Vegetables / sabzi ingredients">Vegetables / sabzi (potato, onion, tomato, bhindi, spinach)</option>
+                  <option value="Dairy">Dairy (milk, dahi, paneer)</option>
+                  <option value="Ready food & leftovers">Ready food & leftovers (roti, cooked dal, cooked sabzi)</option>
+                  <option value="Other / Custom">Other / Custom</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Custom Category Input (shown when Other / Custom is chosen) -->
+            <div class="form-row" id="customCategoryRow" hidden>
+              <div class="form-group flex-1">
+                <label for="customCategoryInput">Custom Category Name *</label>
+                <input type="text" id="customCategoryInput" placeholder="e.g. Masalas & Spices, Chutneys, Pickles" maxlength="50">
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group flex-1">
+                <label for="itemQuantity">Quantity *</label>
+                <input type="number" id="itemQuantity" min="0.1" step="any" value="1" required>
+              </div>
+              <div class="form-group flex-1">
+                <label for="itemUnit">Unit</label>
+                <select id="itemUnit">
+                  <option value="kg">kg</option>
+                  <option value="g">g</option>
+                  <option value="packet">packet</option>
+                  <option value="pieces">pieces</option>
+                  <option value="bunch">bunch</option>
+                  <option value="katori / cup">katori / cup</option>
+                  <option value="litres / ml">litres / ml</option>
+                  <option value="custom">Custom unit...</option>
+                </select>
+              </div>
+              <div class="form-group flex-1" id="customUnitRow" hidden>
+                <label for="customUnitInput">Enter Unit *</label>
+                <input type="text" id="customUnitInput" placeholder="e.g. bowl, plate, pinch" maxlength="25">
+              </div>
+              <div class="form-group flex-2">
+                <label for="itemExpDate">Listed Date * (Best-by / Expiration)</label>
+                <input type="date" id="itemExpDate" required>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group flex-1">
+                <label for="itemNotes">Notes (Optional)</label>
+                <input type="text" id="itemNotes" placeholder="e.g. Opened 2 days ago, half bag" maxlength="100">
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button type="button" id="cancelAddBtn" class="btn btn-secondary btn-sm">Cancel</button>
+              <button type="submit" class="btn btn-primary btn-sm">Save to Pantry</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Inventory Filter & Sort Toolbar -->
+        <div class="inventory-toolbar">
+          <div class="search-box">
+            <input type="text" id="pantrySearchInput" placeholder="Filter items by name..." aria-label="Search pantry items">
+          </div>
+          <div class="sort-box">
+            <label for="pantrySortSelect">Sort:</label>
+            <select id="pantrySortSelect">
+              <option value="soonest">Soonest Expiring</option>
+              <option value="furthest">Latest Expiring</option>
+              <option value="name">Name (A-Z)</option>
+              <option value="category">Category</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Urgency Summary Strip -->
+        <div class="urgency-strip" id="urgencyStrip">
+          <div class="strip-item urgent-item">
+            <span class="strip-count" id="urgentCount">0</span>
+            <span class="strip-text">Urgent (&le; 2 days)</span>
+          </div>
+          <div class="strip-item upcoming-item">
+            <span class="strip-count" id="upcomingCount">0</span>
+            <span class="strip-text">Upcoming (3-5 days)</span>
+          </div>
+          <div class="strip-item fresh-item">
+            <span class="strip-count" id="freshCount">0</span>
+            <span class="strip-text">Safe (6+ days)</span>
+          </div>
+          <div class="strip-item total-item">
+            <span class="strip-count" id="totalPantryCount">0</span>
+            <span class="strip-text">Total Items</span>
+          </div>
+        </div>
+
+        <!-- Pantry Item Cards List -->
+        <div id="pantryList" class="pantry-list" role="list">
+          <!-- Dynamic cards injected via JavaScript -->
+        </div>
+
+        <!-- Empty Pantry State -->
+        <div id="pantryEmptyState" class="empty-state" hidden>
+          <div class="empty-icon">🧺</div>
+          <h3>Your pantry is empty</h3>
+          <p>Add ingredients with their listed dates, or load sample items to see FreshLoop in action.</p>
+          <button id="emptySampleBtn" class="btn btn-outline-dark btn-sm">Load Realistic Sample Items</button>
+        </div>
+      </section>
+
+      <!-- RIGHT COLUMN: MEAL RESCUE PLANNER -->
+      <section class="panel planner-panel" aria-labelledby="plannerHeading">
+        <div class="panel-header">
+          <div>
+            <h2 id="plannerHeading">Meal Rescue Planner</h2>
+            <p class="panel-subtitle">Transparent single-meal plan prioritizing soon-dated items</p>
+          </div>
+        </div>
+
+        <!-- Meal Preference Configuration -->
+        <div class="planner-config-card">
+          <label class="config-label">Rescue Preference:</label>
+          <div class="preference-group" role="radiogroup" aria-label="Meal rescue priority">
+            <label class="pref-card selected" for="prefMostSoon">
+              <input type="radio" id="prefMostSoon" name="mealPreference" value="most_soon" checked>
+              <div class="pref-content">
+                <div class="pref-title">
+                  <span class="pref-badge">🎯 Prioritize Urgency</span>
+                  <strong>Use Most Soon-Dated Items</strong>
+                </div>
+                <p class="pref-desc">Combines the highest number of soonest-expiring perishables into one cohesive recipe.</p>
+              </div>
+            </label>
+
+            <label class="pref-card" for="prefQuickest">
+              <input type="radio" id="prefQuickest" name="mealPreference" value="quickest">
+              <div class="pref-content">
+                <div class="pref-title">
+                  <span class="pref-badge">⚡ Prioritize Speed</span>
+                  <strong>Quickest Meal</strong>
+                </div>
+                <p class="pref-desc">Fast prep & cooking (&le; 20 minutes) using your most urgent ingredients first.</p>
+              </div>
+            </label>
+          </div>
+
+          <div class="config-secondary-row">
+            <div class="meal-type-selector">
+              <label for="mealTypeSelect">Meal Type:</label>
+              <select id="mealTypeSelect">
+                <option value="any">Any / Best Fit</option>
+                <option value="breakfast">Breakfast</option>
+                <option value="lunch">Lunch</option>
+                <option value="dinner">Dinner</option>
+                <option value="snack">Snack / Quick Bite</option>
+              </select>
+            </div>
+
+            <button id="generatePlanBtn" class="btn btn-citrus btn-lg">
+              <span class="btn-spinner" hidden></span>
+              <span class="btn-label">✨ Generate Rescue Plan</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Plan Presentation Area -->
+        <div id="planDisplayArea" class="plan-display-area">
+          <!-- Default Prompt / Empty State -->
+          <div id="planPlaceholder" class="plan-placeholder">
+            <div class="placeholder-graphic">🍳</div>
+            <h3>Ready to Rescue Food</h3>
+            <p>Select your rescue preference above and click <strong>Generate Rescue Plan</strong>. FreshLoop will inspect your items' dates, choose the most urgent ingredients, and propose a structured recipe.</p>
+            <div class="rule-hint">
+              <strong>Transparent Policy:</strong> Ingredients are never removed until you click <em>Confirm Meal Made</em> after cooking.
+            </div>
+          </div>
+
+          <!-- Active Rescue Plan Card (Populated when generated) -->
+          <div id="planCard" class="plan-card" hidden>
+            <div class="plan-card-header">
+              <div class="plan-source-badge" id="planSourceBadge">
+                <!-- e.g. "✦ Powered by Gemini" or "⚙ Offline Rule-Based Fallback" -->
+              </div>
+              <h3 id="planTitle" class="plan-title">Recipe Title</h3>
+              <div class="plan-meta-row">
+                <span class="meta-pill" id="planPrepTime">⏱ Prep: 10m</span>
+                <span class="meta-pill" id="planCookTime">🔥 Cook: 15m</span>
+                <span class="meta-pill" id="planServings">👥 Servings: 2</span>
+              </div>
+            </div>
+
+            <!-- Rescue Reason Callout -->
+            <div class="rescue-reason-box">
+              <div class="reason-label">
+                <span class="reason-icon">💡</span>
+                <strong>Why this meal was chosen:</strong>
+              </div>
+              <p id="planRescueReason" class="reason-text">
+                Uses your upcoming items to prevent them from spoiling.
+              </p>
+            </div>
+
+            <!-- Ingredients Section -->
+            <div class="plan-section">
+              <h4 class="section-title">Ingredients Rescued from Your Pantry</h4>
+              <ul id="planUsedIngredientsList" class="used-ingredients-list">
+                <!-- Injected via JS -->
+              </ul>
+            </div>
+
+            <!-- Pantry Staples / Ingredients Policy Section -->
+            <div class="plan-section" id="staplesSection">
+              <h4 class="section-title">Ingredients & Spices Check</h4>
+              <div id="planStaplesList" class="staples-tags">
+                <!-- Injected via JS -->
+              </div>
+            </div>
+
+            <!-- Instructions Section -->
+            <div class="plan-section">
+              <h4 class="section-title">Preparation & Cooking Steps</h4>
+              <ol id="planInstructionsList" class="instructions-list">
+                <!-- Injected via JS -->
+              </ol>
+            </div>
+
+            <!-- Food Safety Check -->
+            <div class="plan-safety-notice">
+              <div class="safety-mini-icon">🔍</div>
+              <div>
+                <strong>Safety Verification:</strong>
+                <span id="planSafetyText">Inspect each perishable ingredient for fresh smell and appearance prior to cooking.</span>
+              </div>
+            </div>
+
+            <!-- Action Area: CONFIRM MEAL COOKED -->
+            <div class="plan-action-bar">
+              <div class="confirm-notice">
+                <p>Did you cook this meal? Confirming will deduct the used ingredients from your inventory and record your rescue.</p>
+              </div>
+              <div class="confirm-buttons">
+                <button id="discardPlanBtn" class="btn btn-secondary">
+                  Discard Plan
+                </button>
+                <button id="confirmCookedBtn" class="btn btn-forest btn-lg">
+                  🍳 Confirm Meal Made & Deduct Items
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- BOTTOM SECTION: CONFIRMED RESCUE LOG & HONEST IMPACT -->
+    <section class="panel impact-panel" aria-labelledby="impactHeading">
+      <div class="impact-header-row">
+        <div>
+          <h2 id="impactHeading">Confirmed Rescue Log & Impact</h2>
+          <p class="panel-subtitle">
+            Measured exclusively through meals you explicitly confirm. We do not claim money, CO₂, or food-safety metrics that cannot be verified.
+          </p>
+        </div>
+        <button id="clearHistoryBtn" class="btn btn-outline-danger btn-sm" title="Clear verified history">
+          Clear History
+        </button>
+      </div>
+
+      <div class="impact-metrics-grid">
+        <div class="metric-card">
+          <span class="metric-number" id="confirmedMealsCount">0</span>
+          <span class="metric-label">Confirmed Meals Cooked</span>
+          <span class="metric-detail">Verified recipes prepared</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-number" id="confirmedItemsCount">0</span>
+          <span class="metric-label">Confirmed Ingredients Rescued</span>
+          <span class="metric-detail">Pantry items used before disposal</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-number" id="activePantryCount">0</span>
+          <span class="metric-label">Active Pantry Items</span>
+          <span class="metric-detail">Currently monitored ingredients</span>
+        </div>
+      </div>
+
+      <!-- History Log Table / List -->
+      <div class="history-container">
+        <h4 class="history-title">Confirmed Cooking History</h4>
+        <div id="historyList" class="history-list">
+          <!-- Injected via JS -->
+        </div>
+        <div id="historyEmpty" class="history-empty">
+          No confirmed meals yet. Cook a recommended recipe and click "Confirm Meal Made" to log it here.
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Notification Toast Container -->
+  <div id="toastContainer" class="toast-container" aria-live="polite"></div>
+
+  <!-- Application Script -->
+  <script src="app.js"></script>
+</body>
+</html>
